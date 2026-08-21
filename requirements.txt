@@ -1,0 +1,22 @@
+# Tested with Python 3.12.12
+
+# IBKR connectivity
+ib_async==2.1.0
+
+# Backtesting
+vectorbt==0.28.4
+
+# Data / numerical computing
+pandas==2.3.3
+numpy==2.3.5
+
+# Database
+SQLAlchemy==2.0.51
+psycopg2-binary==2.9.12
+
+# Research / statistics
+scipy==1.16.3
+
+# Plotting / visualization
+matplotlib==3.10.0
+plotly==6.5.2

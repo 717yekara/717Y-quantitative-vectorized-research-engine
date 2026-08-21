@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local databases / market data
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+*.h5
+*.hdf5
+
+# Logs
+logs/
+*.log
+
+# Generated reports
+reports/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Python environments
+.venv/
+venv/
