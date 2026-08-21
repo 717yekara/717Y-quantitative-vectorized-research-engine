@@ -1,12 +1,22 @@
-717Y Quantitative Research Engine
+# 717Y Quantitative Research Engine
 
-A public technical preview of an institutional-style systematic trading architecture
+> A public technical preview of an institutional-style systematic trading architecture.
 
-This repository is a deliberately limited public view of a larger quantitative trading and research system.
+**Public technical preview — deliberately limited.**
 
-It demonstrates the architecture, research methodology, portfolio construction, risk controls, validation framework, and execution design behind the system without exposing proprietary datasets, credentials, production configurations, or the full research stack.
+This repository is a technical snapshot of a larger quantitative research and
+trading architecture. It is intended to demonstrate engineering, quantitative
+research, portfolio construction, risk management, validation, and execution
+design.
 
-⸻
+Proprietary research, datasets, credentials, production configurations,
+monitoring infrastructure, and other components of the broader system are
+intentionally not included.
+
+This repository should not be interpreted as a claim of production readiness,
+investment performance, or a complete representation of the underlying research
+environment.
+---
 
 Overview
 
@@ -76,7 +86,7 @@ The public repository provides a technical snapshot of that architecture.
                          │ Analytics & Reports  │
                          └─────────────────────┘
 
-⸻
+---
 
 Architectural principle: research and execution share the same portfolio logic
 
@@ -109,7 +119,7 @@ The backtester therefore uses the same portfolio construction and sizing functio
 
 VectorBT is responsible for simulating execution, rather than independently deciding how capital should be allocated.
 
-⸻
+---
 
 Research and validation
 
@@ -157,7 +167,7 @@ Parameters are selected using the in-sample period and then evaluated on the sub
 
 The purpose is to examine whether observed strategy performance survives when the data used to select parameters is no longer available to the optimization process.
 
-⸻
+---
 
 Parameter stability
 
@@ -175,7 +185,7 @@ For example, the system tracks the modal winning fast_window and slow_window, th
 
 This provides a second dimension of robustness analysis beyond headline backtest performance.
 
-⸻
+---
 
 Portfolio construction
 
@@ -191,7 +201,7 @@ The allocator produces target weights.
 
 The position sizer then converts those weights into executable whole-share quantities while enforcing portfolio-level risk constraints.
 
-⸻
+---
 
 Risk controls
 
@@ -222,7 +232,7 @@ Whole Shares
       ↓
 Executable Position
 
-⸻
+---
 
 Execution architecture
 
@@ -242,7 +252,7 @@ The system is intentionally dry-run by default.
 
 Paper trading should be used before any live deployment.
 
-⸻
+---
 
 Auditability
 
@@ -266,7 +276,7 @@ Order
 
 This separation makes it possible to inspect not only what happened, but also why the system intended to do it.
 
-⸻
+---
 
 Repository structure
 
@@ -297,7 +307,7 @@ Technical Strategies/
 
 The notebooks are intentionally included because they show the research process, rather than presenting the project as a black-box library.
 
-⸻
+---
 
 Key modules
 
@@ -314,7 +324,7 @@ performance_analytics.py	Performance, risk and drawdown analytics
 execution_engine.py	IBKR order construction and execution workflow
 main.py	Command-line orchestration
 
-⸻
+---
 
 Example workflow
 
@@ -339,7 +349,7 @@ Select an allocator
 python main.py backtest --allocator volatility_weight
 python main.py trade --allocator volatility_weight
 
-⸻
+---
 
 Safety model
 
@@ -356,7 +366,7 @@ This repository is a research and engineering framework, not a production-ready 
 
 Production deployment would additionally require infrastructure for monitoring, alerting, reconciliation, operational controls, failure recovery, secrets management, and independent validation.
 
-⸻
+---
 
 Technology
 
@@ -381,7 +391,7 @@ NumPy        2.3.5
 SciPy        1.16.3
 SQLAlchemy   2.0.51
 
-⸻
+---
 
 Public repository scope
 
@@ -399,7 +409,7 @@ It intentionally excludes:
 
 The purpose of publishing the repository is to demonstrate the engineering principles and quantitative research methodology behind the system.
 
-⸻
+---
 
 Roadmap
 
@@ -419,10 +429,20 @@ Potential future development includes:
 * production monitoring and reconciliation
 * expanded asset-class support
 
-⸻
+---
 
 Disclaimer
 
 This project is provided for research and educational purposes.
 
 It is not investment advice and should not be used to trade capital without appropriate independent testing, operational controls, risk management, and supervision.
+
+## Disclaimer
+
+This project is provided for research and educational purposes.
+
+Nothing in this repository constitutes investment advice, a recommendation to
+buy or sell securities, or a guarantee of trading performance.
+
+Trading financial instruments involves substantial risk, including the potential
+loss of capital.
