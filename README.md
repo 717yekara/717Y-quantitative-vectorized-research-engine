@@ -433,11 +433,17 @@ Potential future development includes:
 
 ## Disclaimer
 
-This project is provided for research and educational purposes.
+This project is provided **strictly for research and educational purposes**.
 
-Nothing in this repository constitutes investment advice, a recommendation to
-buy or sell securities, or a guarantee of trading performance.
+Nothing in this repository constitutes investment advice, a recommendation to buy or sell securities, or a guarantee of trading performance.
 
-Trading financial instruments involves substantial risk, including the potential
-loss of capital.
+Trading financial instruments involves substantial risk, including the potential loss of capital.
+
+The strategies, models, backtests, simulations, analytics, and other outputs are hypothetical and may rely on assumptions that do not reflect real-world trading conditions.
+
+Historical or simulated performance is not indicative of future results.
+
+The presence of an IBKR integration or dry-run capability does not imply that the system is suitable for live or production trading.
+
+Any use with real capital is solely the responsibility of the user and requires appropriate independent validation, risk controls, compliance review, and operational safeguards.
 
