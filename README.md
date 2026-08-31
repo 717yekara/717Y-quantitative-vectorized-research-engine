@@ -1,4 +1,4 @@
-# 717Y Quantitative Research Engine
+# 717Y Quantitative Vectorized Research Engine
 
 > A public technical preview of an institutional-style systematic trading architecture.
 
