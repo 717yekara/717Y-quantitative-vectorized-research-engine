@@ -1,448 +1,350 @@
-# VectorBT Engine
+# Zipline Factor Engine
 
-> A public technical preview of an institutional-style systematic trading architecture.
+> A public technical preview of an institutional-style event-driven quantitative research architecture.
 
 **Public technical preview — deliberately limited.**
 
-This repository is a technical snapshot of a larger quantitative research and
-trading architecture. It is intended to demonstrate engineering, quantitative
-research, portfolio construction, risk management, validation, and execution
-design.
+This repository is a technical snapshot of a larger quantitative research and trading architecture. It is intended to demonstrate engineering, quantitative research, factor research, portfolio construction, risk management, event-driven backtesting, validation, analytics, and execution design.
 
-Proprietary research, datasets, credentials, production configurations,
-monitoring infrastructure, and other components of the broader system are
-intentionally not included.
+Proprietary research, datasets, credentials, production configurations, monitoring infrastructure, and other components of the broader system are intentionally not included.
 
-This repository should not be interpreted as a claim of production readiness,
-investment performance, or a complete representation of the underlying research
-environment.
----
+## This repository should not be interpreted as a claim of production readiness, investment performance, or a complete representation of the underlying research environment.
 
-Overview
+## Overview
 
-The 717Y Quantitative Research Engine is a Python-based systematic trading and quantitative research framework designed around a separation of responsibilities between:
+The 717Y Quantitative Event-Driven Research Engine is a Python-based quantitative research framework designed around a separation of responsibilities between:
 
-Research → Validation → Portfolio Construction → Risk → Execution
+**Research → Validation → Portfolio Construction → Risk → Event-Driven Execution**
 
-The objective is not simply to backtest trading signals.
+The objective is not simply to backtest factor signals.
 
 The system is designed to answer a more complete question:
 
-Can a systematic trading idea be researched, validated, sized, risk-controlled, and ultimately translated into executable orders through one coherent architecture?
+**Can a quantitative trading idea be researched, validated, sized, risk-controlled, simulated through an event-driven execution model, and ultimately translated into executable orders through one coherent architecture?**
 
 The public repository provides a technical snapshot of that architecture.
 
-                    717Y QUANTITATIVE RESEARCH ENGINE
-                         ┌─────────────────────┐
-                         │    IBKR Market Data │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   Market Database   │
-                         │   SQLite / Postgres │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   Feature Engine    │
-                         │ MA / RSI / BB / Vol │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │  Strategy Engine    │
-                         │ Signal generation   │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   Signal Generator  │
-                         │ Position state      │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                     ┌──────────────────────────────┐
-                     │ Portfolio Allocator / Sizer  │
-                     │                              │
-                     │ Equal Weight                 │
-                     │ Volatility Weight            │
-                     │ Risk Parity                  │
-                     │ Kelly Weight                 │
-                     └──────────────┬───────────────┘
-                                    │
-                         ┌──────────┴──────────┐
-                         │                     │
-                         ▼                     ▼
-                ┌────────────────┐    ┌─────────────────┐
-                │ VectorBT        │    │ IBKR Execution  │
-                │ Backtesting     │    │ Engine          │
-                └───────┬────────┘    └────────┬────────┘
-                        │                      │
-                        └──────────┬───────────┘
-                                   ▼
-                         ┌─────────────────────┐
-                         │ Performance / Risk  │
-                         │ Analytics & Reports  │
-                         └─────────────────────┘
+```
+                 717Y QUANTITATIVE EVENT-DRIVEN
+                       RESEARCH ENGINE
+                              │
+                              ▼
+                    ┌─────────────────────┐
+                    │   IBKR Market Data  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Zipline Bundle   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Data Portal      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Pipeline Engine   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Factor Engine    │
+                    │ Momentum / Mean Rev │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Strategy Engine   │
+                    │ Cross-sectional     │
+                    │ signal selection    │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                 ┌────────────────────────────┐
+                 │ Portfolio Allocator / Risk │
+                 │                            │
+                 │ Equal Weight               │
+                 │ Volatility Weight          │
+                 │ Risk Parity                │
+                 │ Kelly Weight               │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                    ┌─────────────────────┐
+                    │  Event-Driven       │
+                    │  Scheduler / Orders │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ Zipline Event Loop  │
+                    │ Commission/Slippage │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ Performance / Risk  │
+                    │ Analytics & Reports  │
+                    └─────────────────────┘
+```
 
 ---
 
-Architectural principle: research and execution share the same portfolio logic
+## Architectural principle: event-driven research and execution simulation
 
-One of the central design decisions is that portfolio allocation and position sizing are not left to the backtesting framework or independently reimplemented in the execution layer.
+The central architectural principle is that portfolio decisions are evaluated through an explicit event-driven lifecycle rather than applying an entire history of signals simultaneously.
 
 The architecture is:
 
-Prices
-   ↓
-Strategy
-   ↓
-Signals
-   ↓
-PortfolioAllocator
-   ↓
-Target Weights
-   ↓
-PositionSizer
-   ↓
-Whole-share positions
-   ↓
-       ┌───────────────┬────────────────┐
-       ↓               ↓
-   VectorBT          IBKR
-   Backtest        Execution
+**Market Data → Pipeline → Factors → Strategy → Portfolio Allocation → Risk Controls → Scheduled Rebalance → Orders → Event Loop → Portfolio → Analytics**
 
-This is important because an apparently small difference between backtest sizing and live sizing can create a significant difference between research results and actual implementation.
+Zipline is responsible for the event-driven simulation framework.
 
-The backtester therefore uses the same portfolio construction and sizing functions that the execution engine uses.
+The research engine is responsible for defining the factors, strategies, portfolio construction, risk constraints, and analytics that operate within that framework.
 
-VectorBT is responsible for simulating execution, rather than independently deciding how capital should be allocated.
+This separation makes it possible to study how a quantitative decision moves through an event-driven system from data to portfolio state and simulated execution.
 
 ---
 
-Research and validation
+## Research and validation
 
 The research layer includes more than a single historical backtest.
 
-The public notebooks demonstrate components of a broader validation workflow including:
+The public notebooks and research modules demonstrate components of a broader validation workflow including:
 
-* parameter-grid evaluation
-* time-based parameter sweeps
-* walk-forward optimization
-* in-sample / out-of-sample testing
-* winning-parameter tracking
-* parameter stability analysis
-* Sharpe decay analysis
-* pooled cross-symbol validation
-* drawdown analysis
-* return-distribution analysis
-* VaR / CVaR analysis
-* exposure sanity checks
-* concurrent-position analysis
-* allocator comparison
+- factor-level validation
+- Information Coefficient analysis
+- quantile-return analysis
+- strategy comparison
+- allocator comparison
+- parameter-grid evaluation
+- walk-forward validation
+- in-sample / out-of-sample testing
+- Sharpe decay analysis
+- portfolio exposure analysis
+- drawdown analysis
+- performance attribution
 
-Walk-forward validation
-
-The walk-forward framework separates historical data into sequential windows:
-
-                    Fold 0
-        ┌──────────────────────┐
-        │       IN SAMPLE      │ OOS
-        │                      │
-        └──────────────────────┴─────┐
-                                     │
-                         Fold 1
-              ┌──────────────────────┴─────┐
-              │       IN SAMPLE            │ OOS
-              │                            │
-              └────────────────────────────┴─────┐
-                                      Fold 2
-                           ┌────────────────────────────┴─────┐
-                           │       IN SAMPLE                   │ OOS
-                           │                                   │
-                           └───────────────────────────────────┘
-
-Parameters are selected using the in-sample period and then evaluated on the subsequent out-of-sample period.
-
-The purpose is to examine whether observed strategy performance survives when the data used to select parameters is no longer available to the optimization process.
+The research layer is deliberately separated from the event-driven engine so that research questions can be evaluated without turning the core engine into experiment-specific code.
 
 ---
 
-Parameter stability
-
-The research layer also records the winning parameters selected in each walk-forward fold.
-
-Rather than asking only:
-
-“What parameter produced the highest Sharpe?”
-
-the framework can also examine:
-
-“How stable is the selected parameter through time?”
-
-For example, the system tracks the modal winning fast_window and slow_window, their frequency across folds, and their observed ranges.
-
-This provides a second dimension of robustness analysis beyond headline backtest performance.
-
----
-
-Portfolio construction
+## Portfolio construction
 
 The portfolio layer supports multiple allocation methodologies:
 
-Allocator	Description
-equal_weight	Allocates capital evenly among active signals
-volatility_weight	Inverse-volatility allocation
-risk_parity	Simplified diagonal risk-parity implementation
-kelly_weight	Half-Kelly allocation based on rolling return statistics
+| Allocator | Description |
+|---|---|
+| `equal_weight` | Allocates capital evenly among active signals |
+| `volatility_weight` | Inverse-volatility allocation |
+| `risk_parity` | Simplified diagonal risk-parity implementation |
+| `kelly_weight` | Fractional Kelly allocation based on rolling returns |
+| `factor_neutral` | Factor-aware neutral allocation |
+| `dollar_neutral` | Long/short dollar-neutral allocation |
 
-The allocator produces target weights.
+The allocator produces target portfolio weights.
 
-The position sizer then converts those weights into executable whole-share quantities while enforcing portfolio-level risk constraints.
+Portfolio-level constraints are then applied before orders are generated.
 
 ---
 
-Risk controls
+## Risk controls
 
-Risk constraints are centralized in the portfolio sizing layer.
+Risk constraints are centralized within the portfolio construction and execution architecture.
 
 Current controls include:
 
-* maximum position size
-* maximum gross exposure
-* kill-switch drawdown threshold
-* whole-share position sizing
-* exposure monitoring
-* concurrent-position monitoring
+- maximum position size
+- maximum gross exposure
+- target net exposure
+- whole-share position sizing
+- exposure monitoring
+- drawdown-based kill-switch architecture
 
-The objective is to prevent risk rules from being implemented differently in research and execution.
-
-For example:
-
-Target Weight
-      ↓
-Position Sizer
-      ↓
-Position Cap
-      ↓
-Gross Exposure Cap
-      ↓
-Whole Shares
-      ↓
-Executable Position
+The purpose is to keep portfolio construction and risk constraints explicit rather than hiding them inside the backtesting framework.
 
 ---
 
-Execution architecture
+## Event-driven execution architecture
 
-The execution layer is designed around Interactive Brokers.
+The execution layer is built around Zipline's event-driven lifecycle.
 
-The execution engine:
+The core sequence is:
 
-1. receives strategy signals
-2. obtains current portfolio information
-3. uses the shared portfolio allocator
-4. applies the shared position-sizing logic
-5. constructs target orders
-6. supports dry-run operation
-7. can submit orders to IBKR
+```text
+Market Event
+      ↓
+before_trading_start()
+      ↓
+Pipeline Output
+      ↓
+Scheduled Rebalance
+      ↓
+Factor Strategy
+      ↓
+Portfolio Allocator
+      ↓
+Target Weights
+      ↓
+Order Generation
+      ↓
+Commission + Slippage
+      ↓
+Portfolio Update
+```
 
-The system is intentionally dry-run by default.
+Unlike a vectorized backtest, decisions occur as events are processed by the simulation engine.
+
+This makes the execution lifecycle itself part of the research architecture.
+
+---
+
+## IBKR execution architecture
+
+Zipline's `run_algorithm` is a backtesting engine and does not itself provide the live brokerage connection used by this project.
+
+The IBKR bridge is therefore intentionally separated from the event-driven research engine.
+
+`execution/broker_ibkr.py` provides the interface between portfolio targets and IBKR orders while keeping broker-specific functionality outside the Zipline event loop.
+
+The execution layer is intentionally dry-run by default.
 
 Paper trading should be used before any live deployment.
 
----
-
-Auditability
-
-Signals and intended orders are designed to be persisted to the database.
-
-This creates an audit trail between:
-
-Market Data
-     ↓
-Features
-     ↓
-Strategy Decision
-     ↓
-Signal
-     ↓
-Portfolio Allocation
-     ↓
-Position Size
-     ↓
-Order
-
-This separation makes it possible to inspect not only what happened, but also why the system intended to do it.
+The presence of an IBKR integration does not mean this repository is a production trading system.
 
 ---
 
-Repository structure
+## Auditability
 
-Technical Strategies/
+The architecture is designed around an explicit chain of responsibility:
+
+**Market Data → Factors → Strategy Decision → Portfolio Allocation → Risk Controls → Orders → Portfolio State → Performance**
+
+This separation makes it possible to study not only what the system did, but also which architectural layer was responsible for each decision.
+
+---
+
+## Repository structure
+
+```text
+Factor Engine/
 │
-├── backtester.py
 ├── config.py
-├── database.py
-├── execution_engine.py
-├── feature_engine.py
-├── ibkr_data.py
 ├── main.py
-├── performance_analytics.py
-├── portfolio_engine.py
-├── signal_generator.py
-├── strategy_engine.py
 │
-├── research.ipynb
-├── portfolio_analysis.ipynb
-├── walk_forward.ipynb
-├── walk_forward_optimization.ipynb
+├── data/
+│   ├── bundle.py
+│   ├── ingest.py
+│   ├── loaders.py
+│   └── universe.py
+│
+├── factors/
+│   ├── common.py
+│   ├── liquidity.py
+│   ├── mean_reversion.py
+│   └── momentum.py
+│
+├── strategies/
+│   ├── factor_pipeline.py
+│   ├── mean_reversion.py
+│   └── momentum.py
+│
+├── portfolio/
+│   └── allocators.py
+│
+├── execution/
+│   ├── scheduler.py
+│   ├── costs.py
+│   └── broker_ibkr.py
+│
+├── analytics/
+│   ├── performance.py
+│   ├── factor_analysis.py
+│   ├── attribution.py
+│   └── reports.py
+│
+├── research/
+│   ├── factor_tests.py
+│   ├── portfolio_tests.py
+│   ├── parameter_sweeps.py
+│   ├── walk_forward.py
+│   └── robustness.py
+│
+├── tests/
+│   └── test_allocators.py
+│
+├── notebooks/
 │
 ├── requirements.txt
-├── README.md
-│
-└── data/
-    └── market.db          # local / ignored
-
-The notebooks are intentionally included because they show the research process, rather than presenting the project as a black-box library.
+└── README.md
+```
 
 ---
 
-Key modules
+## Technology
 
-Module	Responsibility
-config.py	Central configuration for database, IBKR, strategy and risk parameters
-database.py	SQLAlchemy models and market-data / audit persistence
-ibkr_data.py	Historical market-data retrieval through IBKR
-feature_engine.py	Technical features and derived market data
-strategy_engine.py	Strategy implementations and parameter grids
-signal_generator.py	Converts strategy output into position-state signals
-portfolio_engine.py	Portfolio allocation and position sizing shared by backtest and execution
-backtester.py	VectorBT-based historical simulation
-performance_analytics.py	Performance, risk and drawdown analytics
-execution_engine.py	IBKR order construction and execution workflow
-main.py	Command-line orchestration
+- Python
+- Zipline-reloaded
+- pandas
+- NumPy
+- SciPy
+- ib_async
+- Interactive Brokers
+- Matplotlib
+- Plotly
 
----
-
-Example workflow
-
-Refresh market data
-
-python main.py refresh
-
-Run a backtest
-
-python main.py backtest
-
-Run a parameter sweep
-
-python main.py sweep
-
-Generate trading instructions
-
-python main.py trade
-
-Select an allocator
-
-python main.py backtest --allocator volatility_weight
-python main.py trade --allocator volatility_weight
+The repository is built around Zipline's Pipeline API and event-driven simulation framework.
 
 ---
 
-Safety model
-
-The execution layer is designed to fail safely during development.
-
-* Dry-run mode is enabled by default.
-* IBKR paper trading should be used before live deployment.
-* A drawdown kill switch can block new orders.
-* Position-level exposure is capped.
-* Gross portfolio exposure is capped.
-* Signals and orders are recorded for auditability.
-
-This repository is a research and engineering framework, not a production-ready deployment package.
-
-Production deployment would additionally require infrastructure for monitoring, alerting, reconciliation, operational controls, failure recovery, secrets management, and independent validation.
-
----
-
-Technology
-
-* Python 3.12
-* VectorBT
-* pandas
-* NumPy
-* SciPy
-* SQLAlchemy
-* SQLite / PostgreSQL
-* IBKR / ib_async
-* Matplotlib
-* Plotly
-
-Tested environment:
-
-Python       3.12.12
-VectorBT     0.28.4
-ib_async     2.1.0
-pandas       2.3.3
-NumPy        2.3.5
-SciPy        1.16.3
-SQLAlchemy   2.0.51
-
----
-
-Public repository scope
+## Public repository scope
 
 This repository should be viewed as a technical preview rather than a complete representation of the underlying research environment.
 
 It intentionally excludes:
 
-* proprietary market datasets
-* credentials and account information
-* production infrastructure
-* private research
-* proprietary strategy research
-* live trading configurations
-* operational monitoring infrastructure
+- proprietary market datasets
+- credentials and account information
+- production infrastructure
+- private research
+- proprietary strategy research
+- live trading configurations
+- operational monitoring infrastructure
 
 The purpose of publishing the repository is to demonstrate the engineering principles and quantitative research methodology behind the system.
 
 ---
 
-Roadmap
+## Roadmap
 
 Potential future development includes:
 
-* covariance-aware risk parity
-* richer portfolio optimization
-* transaction-cost modeling
-* market-impact modeling
-* more sophisticated execution algorithms
-* experiment tracking
-* automated research reports
-* portfolio-level attribution
-* factor exposure analysis
-* regime detection
-* more extensive statistical validation
-* production monitoring and reconciliation
-* expanded asset-class support
+- covariance-aware risk parity
+- richer portfolio optimization
+- real sector and industry classification
+- Barra-style multi-factor attribution
+- direct database-backed Zipline bundles
+- expanded factor research
+- additional statistical validation
+- broader asset-class support
 
 ---
 
-Disclaimer
-
-This project is provided for research and educational purposes.
-
-It is not investment advice and should not be used to trade capital without appropriate independent testing, operational controls, risk management, and supervision.
-
 ## Disclaimer
 
-This project is provided for research and educational purposes.
+This project is provided **strictly for research and educational purposes**.
 
-Nothing in this repository constitutes investment advice, a recommendation to
-buy or sell securities, or a guarantee of trading performance.
+Nothing in this repository constitutes investment advice, a recommendation to buy or sell securities, or a guarantee of trading performance.
 
-Trading financial instruments involves substantial risk, including the potential
-loss of capital.
+Trading financial instruments involves substantial risk, including the potential loss of capital.
+
+The strategies, models, backtests, simulations, analytics, and other outputs are hypothetical and may rely on assumptions that do not reflect real-world trading conditions.
+
+Historical or simulated performance is not indicative of future results.
+
+The presence of an IBKR integration or dry-run capability does not imply that the system is suitable for live or production trading.
+
+Any use with real capital is solely the responsibility of the user and requires appropriate independent validation, risk controls, compliance review, and operational safeguards.
