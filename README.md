@@ -67,8 +67,6 @@ The public repository provides a technical snapshot of that architecture.
                  │                            │
                  │ Equal Weight               │
                  │ Volatility Weight          │
-                 │ Risk Parity                │
-                 │ Kelly Weight               │
                  └──────────────┬─────────────┘
                                 │
                                 ▼
@@ -86,7 +84,7 @@ The public repository provides a technical snapshot of that architecture.
                                ▼
                     ┌─────────────────────┐
                     │ Performance / Risk  │
-                    │ Analytics & Reports  │
+                    │ Analytics & Reports │
                     └─────────────────────┘
 ```
 
