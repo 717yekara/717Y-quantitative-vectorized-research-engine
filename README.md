@@ -1,4 +1,4 @@
-# 717Y Quantitative Vectorized Research Engine
+# VectorBT Engine
 
 > A public technical preview of an institutional-style systematic trading architecture.
 
