@@ -32,6 +32,7 @@ Can a systematic trading idea be researched, validated, sized, risk-controlled, 
 
 The public repository provides a technical snapshot of that architecture.
 
+```
                     717Y QUANTITATIVE VECTORIZED RESEARCH ENGINE
                          ┌─────────────────────┐
                          │    IBKR Market Data │
@@ -85,7 +86,7 @@ The public repository provides a technical snapshot of that architecture.
                          │ Performance / Risk  │
                          │ Analytics & Reports │
                          └─────────────────────┘
-
+```
 ---
 
 Architectural principle: research and execution share the same portfolio logic
@@ -93,7 +94,7 @@ Architectural principle: research and execution share the same portfolio logic
 One of the central design decisions is that portfolio allocation and position sizing are not left to the backtesting framework or independently reimplemented in the execution layer.
 
 The architecture is:
-
+```text
 Prices
    ↓
 Strategy
@@ -112,6 +113,7 @@ Whole-share positions
    ↓                                ↓
    VectorBT                        IBKR
    Backtest                      Execution
+```
 
 This is important because an apparently small difference between backtest sizing and live sizing can create a significant difference between research results and actual implementation.
 
@@ -146,6 +148,7 @@ Walk-forward validation
 
 The walk-forward framework separates historical data into sequential windows:
 
+```
                     Fold 0
         ┌──────────────────────┐
         │       IN SAMPLE      │ OOS
@@ -162,6 +165,7 @@ The walk-forward framework separates historical data into sequential windows:
                            │       IN SAMPLE                   │ OOS
                            │                                   │
                            └───────────────────────────────────┘
+```
 
 Parameters are selected using the in-sample period and then evaluated on the subsequent out-of-sample period.
 
@@ -219,7 +223,7 @@ Current controls include:
 The objective is to prevent risk rules from being implemented differently in research and execution.
 
 For example:
-
+```text
 Target Weight
       ↓
 Position Sizer
@@ -231,7 +235,7 @@ Gross Exposure Cap
 Whole Shares
       ↓
 Executable Position
-
+```
 ---
 
 Execution architecture
@@ -259,7 +263,7 @@ Auditability
 Signals and intended orders are designed to be persisted to the database.
 
 This creates an audit trail between:
-
+```text
 Market Data
      ↓
 Features
@@ -273,13 +277,14 @@ Portfolio Allocation
 Position Size
      ↓
 Order
+```
 
 This separation makes it possible to inspect not only what happened, but also why the system intended to do it.
 
 ---
 
 Repository structure
-
+```text
 Technical Strategies/
 │
 ├── backtester.py
@@ -304,6 +309,7 @@ Technical Strategies/
 │
 └── data/
     └── market.db          # local / ignored
+```
 
 The notebooks are intentionally included because they show the research process, rather than presenting the project as a black-box library.
 
@@ -329,26 +335,26 @@ main.py	Command-line orchestration
 Example workflow
 
 Refresh market data
-
+```bash
 python main.py refresh
-
+```
 Run a backtest
-
+```bash
 python main.py backtest
-
+```
 Run a parameter sweep
-
+```bash
 python main.py sweep
-
+```
 Generate trading instructions
-
+```bash
 python main.py trade
-
+```
 Select an allocator
-
+```bash
 python main.py backtest --allocator volatility_weight
 python main.py trade --allocator volatility_weight
-
+```
 ---
 
 Safety model
